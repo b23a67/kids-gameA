@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>传统乐器节奏游戏（稳定版）</title>
+    <style>
+        body { text-align: center; font-family: "微软雅黑"; background: #f9f3e9; padding: 20px; }
+        h1 { color: #8e44ad; }
+        .tip { color: #d35400; font-size: 16px; margin: 20px 0; font-weight: bold; }
+        .status { color: #27ae60; font-size: 14px; margin: 10px 0; }
+        .instrument-group { margin-top: 30px; }
+        .instrument-btn {
+            width: 120px;
+            height: 120px;
+            margin: 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 18px;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .instrument-btn:active { transform: scale(0.95); }
+        .erhu { background-color: #7f8c8d; }
+        .guzheng { background-color: #27ae60; }
+        .dizi { background-color: #34495e; }
+        .pipa { background-color: #e67e22; }
+    </style>
+</head>
+<body>
+    <h1>传统乐器小乐园</h1>
+    <p class="tip">第一步：点击页面任意位置激活音频！</p>
+    <p class="status" id="audioStatus">音频未激活</p>
+    <div class="instrument-group">
+        <button class="instrument-btn erhu" onclick="playSound('erhu')">二胡</button>
+        <button class="instrument-btn guzheng" onclick="playSound('guzheng')">古筝</button>
+        <button class="instrument-btn dizi" onclick="playSound('dizi')">笛子</button>
+        <button class="instrument-btn pipa" onclick="playSound('pipa')">琵琶</button>
+    </div>
+
+    <script>
+        let audioContext;
+        const statusEl = document.getElementById('audioStatus');
+
+        // 激活音频并提示
+        document.body.addEventListener('click', () => {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                statusEl.textContent = "音频已激活！可以点击乐器啦~";
+            }
+        }, { once: true });
+
+        function playSound(type) {
+            if (!audioContext) {
+                alert("请先点击页面激活音频！");
+                return;
+            }
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            // 优化音效参数，确保清晰可听
+            switch(type) {
+                case 'erhu': // 二胡：明亮的锯齿波，模拟弦乐
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.value = 294;
+                    gainNode.gain.value = 0.6;
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.2);
+                    break;
+                case 'guzheng': // 古筝：三角波，清脆悦耳
+                    oscillator.type = 'triangle';
+                    oscillator.frequency.value = 330;
+                    gainNode.gain.value = 0.6;
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime + 0.2);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.2);
+                    break;
+                case 'dizi': // 笛子：正弦波，高亢清晰
+                    oscillator.type = 'sine';
+                    oscillator.frequency.value = 523;
+                    gainNode.gain.value = 0.7;
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+                    break;
+                case 'pipa': // 琵琶：方波，模拟拨弦声
+                    oscillator.type = 'square';
+                    oscillator.frequency.value = 440;
+                    gainNode.gain.value = 0.6;
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+                    break;
+            }
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 2);
+        }
+    </script>
+</body>
+</html>
